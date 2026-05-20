@@ -1,8 +1,5 @@
-flask
-flask-cors
-numpy
-joblib
 streamlit
-requests
 pandas
+numpy
 scikit-learn
+joblib

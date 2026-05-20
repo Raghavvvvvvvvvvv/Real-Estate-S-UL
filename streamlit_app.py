@@ -1,11 +1,12 @@
 import streamlit as st
-import requests
 import pandas as pd
+import joblib
+import numpy as np
 
 # =========================================================
-# Fast Request Session
+# Load Model
 # =========================================================
-session = requests.Session()
+model = joblib.load("house_price_model.pkl")
 
 # =========================================================
 # Page Config
@@ -17,7 +18,7 @@ st.set_page_config(
 )
 
 # =========================================================
-# Fast CSS
+# CSS
 # =========================================================
 st.markdown("""
 <style>
@@ -124,43 +125,29 @@ st.divider()
 
 if st.button("🔍 Predict House Price"):
 
-    url = "http://127.0.0.1:5000/predict"
-
-    input_data = {
-        "income": income,
-        "house_age": house_age,
-        "rooms": rooms,
-        "bedrooms": bedrooms,
-        "population": population
-    }
-
     try:
-        response = session.post(
-            url,
-            json=input_data,
-            timeout=3
-        )
 
-        result = response.json()
+        features = np.array([[
+            income,
+            house_age,
+            rooms,
+            bedrooms,
+            population
+        ]])
 
-        if result["success"]:
+        prediction = model.predict(features)[0]
 
-            predicted_price = result["predicted_price"]
+        st.success("✅ Prediction Successful")
 
-            st.success("✅ Prediction Successful")
-
-            st.markdown(f"""
-            <div class="prediction-box">
-                Predicted House Price<br><br>
-                💲 {predicted_price:,.2f}
-            </div>
-            """, unsafe_allow_html=True)
-
-        else:
-            st.error(result["error"])
+        st.markdown(f"""
+        <div class="prediction-box">
+            Predicted House Price<br><br>
+            💲 {prediction:,.2f}
+        </div>
+        """, unsafe_allow_html=True)
 
     except Exception as e:
-        st.error(f"Connection Error: {e}")
+        st.error(f"Prediction Error: {e}")
 
 # =========================================================
 # Feature Table
@@ -197,6 +184,6 @@ st.divider()
 
 st.markdown("""
 <center>
-Made with ❤️ using Flask + Streamlit + Machine Learning
+Made with ❤️ using Streamlit + Machine Learning
 </center>
 """, unsafe_allow_html=True)
